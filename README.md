@@ -146,7 +146,7 @@ ppsplit/
 
 | Tool | Value |
 |------|-------|
-| FFmpeg | Auto-detected: `/opt/homebrew/bin/ffmpeg` (Apple Silicon) or `/usr/local/bin/ffmpeg` (Intel) |
+| FFmpeg | Auto-detected via `brew --prefix` (works on any Homebrew installation) |
 | bc | `/usr/bin/bc` |
 
 ### Direct Script Usage

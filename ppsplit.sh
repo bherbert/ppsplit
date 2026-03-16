@@ -37,12 +37,9 @@ TEMP_SCRIPT=""
 VIDEO_DIR=""
 
 # External Tool Paths
-# Detect architecture to select correct Homebrew prefix
-if [[ "$(uname -m)" == "arm64" ]]; then
-    FFMPEG="/opt/homebrew/bin/ffmpeg"
-else
-    FFMPEG="/usr/local/bin/ffmpeg"
-fi
+for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [[ -x "$BREW_PATH" ]] && { FFMPEG="$("$BREW_PATH" --prefix)/bin/ffmpeg"; break; }
+done
 BC="/usr/bin/bc"
 
 # Arrays for tracking results

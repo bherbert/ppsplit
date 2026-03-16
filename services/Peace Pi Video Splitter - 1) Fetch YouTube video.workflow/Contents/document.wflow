@@ -111,12 +111,9 @@ VERBOSE=""  # or leave empty "" to disable verbose
 
 LOGFILE="$HOME/Library/Logs/yt-dlp.log"
 
-# Detect architecture to select correct Homebrew prefix
-if [[ "$(uname -m)" == "arm64" ]]; then
-    HOMEBREW_BIN="/opt/homebrew/bin"
-else
-    HOMEBREW_BIN="/usr/local/bin"
-fi
+for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [[ -x "$BREW_PATH" ]] &amp;&amp; { HOMEBREW_BIN="$("$BREW_PATH" --prefix)/bin"; break; }
+done
 FFMPEG="--ffmpeg-location $HOMEBREW_BIN"
 YTDLP="$HOMEBREW_BIN/yt-dlp"
 
@@ -126,11 +123,13 @@ echo "Input items: $@" &gt;&gt; $LOGFILE
 # Process each selected folder
 for FOLDER in "$@"; do
 	afplay /System/Library/Sounds/Funk.aiff
+	osascript -e 'display notification "Download started..." with title "Peace Pi Video Splitter"'
 
     echo "Running script on folder: $FOLDER with URL: $NEW_URL"
 	$YTDLP $VERBOSE --no-progress $FFMPEG -o "%(title)s.%(ext)s" -P "$FOLDER" -S res,ext:mp4:m4a --recode mp4 "$NEW_URL" &gt;&gt; $LOGFILE 2&gt;&amp;1
 
 	afplay /System/Library/Sounds/Glass.aiff
+	osascript -e 'display notification "Download ended." with title "Peace Pi Video Splitter"'
 done
 </string>
 					<key>CheckedForUserDefaultShell</key>

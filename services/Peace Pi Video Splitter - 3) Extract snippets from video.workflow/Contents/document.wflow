@@ -97,12 +97,9 @@ TEMP_SCRIPT=""
 VIDEO_DIR=""
 
 # External Tool Paths
-# Detect architecture to select correct Homebrew prefix
-if [[ "$(uname -m)" == "arm64" ]]; then
-    FFMPEG="/opt/homebrew/bin/ffmpeg"
-else
-    FFMPEG="/usr/local/bin/ffmpeg"
-fi
+for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [[ -x "$BREW_PATH" ]] &amp;&amp; { FFMPEG="$("$BREW_PATH" --prefix)/bin/ffmpeg"; break; }
+done
 BC="/usr/bin/bc"
 
 # Arrays for tracking results
@@ -349,7 +346,8 @@ extract_snippet() {
         CREATED_SNIPPETS+=("$(basename "$output_file") (DEBUG MODE)")
     else
         log_message "INFO" "Extracting: $(basename "$output_file") ($start_time to $end_time)"
-        
+        osascript -e "display notification \"Extracting: $title\" with title \"Peace Pi Video Splitter\""
+
         if eval "$ffmpeg_cmd" 2&gt;&gt;"$LOG_FILE"; then
             CREATED_SNIPPETS+=("$(basename "$output_file")")
             log_message "INFO" "Successfully created: $(basename "$output_file")"
