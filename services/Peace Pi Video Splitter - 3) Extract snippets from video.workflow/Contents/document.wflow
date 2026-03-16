@@ -574,6 +574,17 @@ ELAPSED_SEC=$(( ELAPSED % 60 ))
 afplay /System/Library/Sounds/Glass.aiff
 osascript -e "display notification \"Completed at $(date +"%l:%M %p") · ${ELAPSED_MIN}m ${ELAPSED_SEC}s elapsed\" with title \"Peace Pi Video Splitter\""
 
+# Build snippet list and show completion dialog
+SNIPPET_BODY="Created ${#CREATED_SNIPPETS[@]} snippet(s)."
+if [ ${#CREATED_SNIPPETS[@]} -gt 0 ]; then
+    for snippet in "${CREATED_SNIPPETS[@]}"; do
+        SNIPPET_BODY="${SNIPPET_BODY}"$'\n'"• ${snippet%.mp4}"
+    done
+fi
+PPSNIPPETS="$SNIPPET_BODY" osascript \
+    -e 'set msg to system attribute "PPSNIPPETS"' \
+    -e 'display dialog msg with title "Peace Pi Video Splitter" buttons {"OK"} default button "OK" with icon note'
+
 exit 0</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
