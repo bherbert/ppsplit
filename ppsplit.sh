@@ -324,12 +324,12 @@ extract_snippet() {
     if [ "$DEBUG_MODE" = true ]; then
         echo "[DEBUG] Output file: $output_file"
         echo "[DEBUG] Would execute: $ffmpeg_cmd"
-        CREATED_SNIPPETS+=("${safe_title} · ${dur_label} (DEBUG MODE)")
+        CREATED_SNIPPETS+=("${safe_title} (${dur_label}) [DEBUG]")
     else
         log_message "INFO" "Extracting: $(basename "$output_file") ($start_time to $end_time)"
 
         if eval "$ffmpeg_cmd" 2>>"$LOG_FILE"; then
-            CREATED_SNIPPETS+=("${safe_title} · ${dur_label}")
+            CREATED_SNIPPETS+=("${safe_title} (${dur_label})")
             log_message "INFO" "Successfully created: $(basename "$output_file")"
         else
             FAILED_SNIPPETS+=("$(basename "$output_file")")
