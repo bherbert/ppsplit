@@ -26,6 +26,7 @@
 # Lines beginning with # are ignored (comments)
 
 set -euo pipefail
+export LC_NUMERIC=C  # Force decimal point in bc regardless of system locale
 
 # --- 1. CONFIGURATION AND GLOBALS ---
 
@@ -39,9 +40,15 @@ TEMP_SCRIPT=""
 VIDEO_DIR=""
 
 # External Tool Paths
+FFMPEG=""
 for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
     [[ -x "$BREW_PATH" ]] && { FFMPEG="$("$BREW_PATH" --prefix)/bin/ffmpeg"; break; }
 done
+if [[ -z "$FFMPEG" ]]; then
+    echo "Error: Homebrew not found at /opt/homebrew/bin/brew or /usr/local/bin/brew."
+    echo "  Install Homebrew from https://brew.sh, then run: brew install ffmpeg"
+    exit 1
+fi
 BC="/usr/bin/bc"
 
 # Arrays for tracking results
@@ -303,6 +310,7 @@ extract_snippet() {
     fi
     
     if [ "$DEBUG_MODE" = true ]; then
+        echo "[DEBUG] Output file: $output_file"
         echo "[DEBUG] Would execute: $ffmpeg_cmd"
         CREATED_SNIPPETS+=("$(basename "$output_file") (DEBUG MODE)")
     else
@@ -465,8 +473,9 @@ if { [ ! -x "$FFMPEG" ] || [ ! -x "$BC" ]; } && [ "$DEBUG_MODE" = false ]; then
     exit 1
 fi
 
+START_EPOCH=$(date +%s)
 afplay /System/Library/Sounds/Funk.aiff
-osascript -e 'display notification "Video extraction process started..." with title "Peace Pi Video Splitter"'
+osascript -e "display notification \"Video extraction started at: $(date +"%l:%M %p")\" with title \"Peace Pi Video Splitter\""
 
 # Initialize log file and start logging
 > "$LOG_FILE"
@@ -477,11 +486,11 @@ log_message "INFO" "Debug mode: $DEBUG_MODE"
 # 1. Cleanup and Process
 cleanup_existing_videos "$VIDEO_FILE"
 process_csv "$CSV_FILE"
-dump_temp_csv # Show the initial sorted state
+[ "$DEBUG_MODE" = true ] && dump_temp_csv # Show the initial sorted state
 
 # 2. Fix and Finalize
 fix_overlapping_snippets
-dump_temp_csv # Show the state after fixing overlaps
+[ "$DEBUG_MODE" = true ] && dump_temp_csv # Show the state after fixing overlaps
 
 # 3. Extract Snippets (Using Awk-to-Source)
 log_message "INFO" "Starting snippet extraction (Awk-to-Source method)..."
@@ -500,7 +509,10 @@ display_summary
 
 log_message "INFO" "Extraction process completed"
 
+ELAPSED=$(( $(date +%s) - START_EPOCH ))
+ELAPSED_MIN=$(( ELAPSED / 60 ))
+ELAPSED_SEC=$(( ELAPSED % 60 ))
 afplay /System/Library/Sounds/Glass.aiff
-osascript -e 'display notification "Video extraction process completed." with title "Peace Pi Video Splitter"'
+osascript -e "display notification \"Completed at $(date +"%l:%M %p") · ${ELAPSED_MIN}m ${ELAPSED_SEC}s elapsed\" with title \"Peace Pi Video Splitter\""
 
 exit 0

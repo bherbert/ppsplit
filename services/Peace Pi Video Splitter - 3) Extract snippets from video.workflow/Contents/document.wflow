@@ -87,6 +87,7 @@
 # Lines beginning with # are ignored (comments)
 
 set -euo pipefail
+export LC_NUMERIC=C  # Force decimal point in bc regardless of system locale
 
 # --- 1. CONFIGURATION AND GLOBALS ---
 
@@ -364,6 +365,7 @@ extract_snippet() {
     fi
     
     if [ "$DEBUG_MODE" = true ]; then
+        echo "[DEBUG] Output file: $output_file"
         echo "[DEBUG] Would execute: $ffmpeg_cmd"
         CREATED_SNIPPETS+=("$(basename "$output_file") (DEBUG MODE)")
     else
@@ -543,11 +545,11 @@ log_message "INFO" "Debug mode: $DEBUG_MODE"
 # 1. Cleanup and Process
 cleanup_existing_videos "$VIDEO_FILE"
 process_csv "$CSV_FILE"
-dump_temp_csv # Show the initial sorted state
+[ "$DEBUG_MODE" = true ] &amp;&amp; dump_temp_csv # Show the initial sorted state
 
 # 2. Fix and Finalize
 fix_overlapping_snippets
-dump_temp_csv # Show the state after fixing overlaps
+[ "$DEBUG_MODE" = true ] &amp;&amp; dump_temp_csv # Show the state after fixing overlaps
 
 # 3. Extract Snippets (Using Awk-to-Source)
 log_message "INFO" "Starting snippet extraction (Awk-to-Source method)..."

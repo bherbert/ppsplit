@@ -1,0 +1,7 @@
+# Test: commas in titles — officially unsupported (commas are the field delimiter).
+# bash read puts the remainder of the line into the last field, so clips still
+# extract, but titles may be malformed. Users should use dashes instead of commas.
+# start-timestamp, end-timestamp, video-name
+0:10,0:40,Title with a comma, and extra text
+0:50,1:20,Another clip, with multiple, commas
+1:30,2:00,Normal Title

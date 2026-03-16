@@ -51,8 +51,14 @@ Requires: `tests/fixtures/test_video.mp4` (5-minute synthetic video, generated o
 | 9 | `transitions_normal.csv.txt` | `-t` flag — fade filter injected into ffmpeg command | `fade=t=in` present in debug output |
 | 10 | `transitions_normal.csv.txt` | `-t` flag — extraction window shifted back 1 second | `-ss 00:00:59` present (segment `1:00` → adjusted to `0:59`) |
 | 11 | `transitions_zero_start.csv.txt` | `-t` flag — segment starting at `0:00`, adjusted start clamped | `-ss 00:00:00` present (not negative) |
+| 12 | `titles_with_commas.csv.txt` | Titles containing commas (unsupported — commas are the delimiter) | `CREATED SNIPPETS (3)` — clips still extract due to bash `read` semantics; behavior is undefined |
 
-**Total: 11 fixture scenarios**
+**Total: 12 fixture scenarios**
+
+**Recent additions / changes covered:**
+- `export LC_NUMERIC=C` — timestamp arithmetic via `bc` is exercised on every fixture run; any locale-sensitive decimal failure would surface here
+- `[DEBUG] Output file:` line — visible in debug output for all fixtures that produce clips
+- FFMPEG guard (Homebrew path detection + early exit) — exercised implicitly on every test run; the test suite would abort if the guard misfired
 
 ---
 

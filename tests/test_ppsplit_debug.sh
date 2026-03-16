@@ -201,6 +201,11 @@ run_fixture_with_flags_expect_pattern \
     "-t" \
     "\-ss 00:00:00"
 
+run_fixture_expect_summary \
+    "titles_with_commas.csv.txt" \
+    "Commas in titles — clips still extract (bash read puts remainder in last field; officially unsupported)" \
+    "CREATED SNIPPETS (3)"
+
 # --- Summary ---
 
 echo ""

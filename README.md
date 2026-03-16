@@ -79,6 +79,10 @@ Edit `snippets.csv.txt` in your session folder to define the clips:
 
 Lines beginning with `#` are treated as comments and ignored.
 
+Avoid commas in titles — commas are the field delimiter, so a comma in a title will produce unexpected results. Use a dash or other character instead.
+
+If two clips share the same title, the output files are automatically renamed with a numeric suffix: `title_1.mp4`, `title_2.mp4`, etc.
+
 **Supported timestamp formats:**
 
 | Format | Example |
@@ -233,7 +237,7 @@ Then run:
 ./tests/test_ppsplit_debug.sh
 ```
 
-Runs 11 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFmpeg commands without executing):
+Runs 12 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFmpeg commands without executing):
 
 | Fixture | What it tests |
 |---------|--------------|
@@ -247,3 +251,4 @@ Runs 11 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFm
 | `special_chars.csv.txt` | Titles with `:`, `/`, `&`, `"` sanitized to safe filenames |
 | `transitions_normal.csv.txt` | `-t` flag injects fade filters; extraction window shifted back 1 second |
 | `transitions_zero_start.csv.txt` | `-t` flag with `0:00` start — adjusted start clamped to `00:00:00` (not negative) |
+| `titles_with_commas.csv.txt` | Commas in titles (unsupported — commas are the CSV delimiter); clips still extract but behavior is undefined |
