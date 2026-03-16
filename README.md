@@ -10,8 +10,8 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference.
 - [Setup](#setup)
 - [YouTube URL Format](#youtube-url-format)
 - [CSV Format](#csv-format)
-- [Project Structure](#project-structure)
 - [Fade Transitions](#fade-transitions)
+- [Project Structure](#project-structure)
 - [Technical Reference](#technical-reference)
 
 ## The Workflow
@@ -92,6 +92,29 @@ If two clips share the same title, the output files are automatically renamed wi
 | `MM:SS.mmm` | `7:58.500` |
 | `HH:MM:SS.mmm` | `1:07:58.500` |
 
+## Fade Transitions
+
+Quick Action 3 prompts at startup:
+
+> **"Enable fade in/out transitions?"** — Yes / No (default: No)
+
+When enabled, each extracted segment receives a 1-second **fade-in from black** at the start and a 1-second **fade-out to black** at the end.
+
+To ensure the fade covers only the intended content boundaries, the extraction window is automatically expanded by 1 second on each side:
+
+| | Without transitions | With transitions |
+|---|---|---|
+| Extraction start | `start_time` | `start_time − 1s` |
+| Extraction end | `end_time` | `end_time + 1s` |
+| Fade-in | — | frames 0–1s of extracted clip |
+| Fade-out | — | final 1s of extracted clip |
+
+**Example:** a segment defined as `13:00 → 14:50` is extracted from `12:59 → 14:51`. The fade-in covers `12:59–13:00` and the fade-out covers `14:50–14:51`. The content at full brightness is still exactly `13:00–14:50`.
+
+If the segment starts within 1 second of the beginning of the source video, the adjusted start is clamped to `0`.
+
+The `-t` flag can also enable transitions when running `ppsplit.sh` directly from the command line (see below).
+
 ## Project Structure
 
 ```
@@ -128,29 +151,6 @@ ppsplit/
 ├── QUICKSTART.md                       # Quick reference for experienced users
 └── README.md
 ```
-
-## Fade Transitions
-
-Quick Action 3 prompts at startup:
-
-> **"Enable fade in/out transitions?"** — Yes / No (default: No)
-
-When enabled, each extracted segment receives a 1-second **fade-in from black** at the start and a 1-second **fade-out to black** at the end.
-
-To ensure the fade covers only the intended content boundaries, the extraction window is automatically expanded by 1 second on each side:
-
-| | Without transitions | With transitions |
-|---|---|---|
-| Extraction start | `start_time` | `start_time − 1s` |
-| Extraction end | `end_time` | `end_time + 1s` |
-| Fade-in | — | frames 0–1s of extracted clip |
-| Fade-out | — | final 1s of extracted clip |
-
-**Example:** a segment defined as `13:00 → 14:50` is extracted from `12:59 → 14:51`. The fade-in covers `12:59–13:00` and the fade-out covers `14:50–14:51`. The content at full brightness is still exactly `13:00–14:50`.
-
-If the segment starts within 1 second of the beginning of the source video, the adjusted start is clamped to `0`.
-
-The `-t` flag can also enable transitions when running `ppsplit.sh` directly from the command line (see below).
 
 ## Technical Reference
 
