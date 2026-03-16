@@ -309,15 +309,27 @@ extract_snippet() {
     -c:v libx264 -c:a aac -hide_banner -loglevel error -nostats \"$output_file\""
     fi
     
+    # Compute user-visible duration (always from the original timestamps, not the transitions window)
+    local dur_sec dur_min dur_s dur_label
+    dur_sec=$(echo "$(timestamp_to_seconds "$end_time") - $(timestamp_to_seconds "$start_time")" | "$BC")
+    dur_sec=${dur_sec%%.*}
+    dur_min=$(( dur_sec / 60 ))
+    dur_s=$(( dur_sec % 60 ))
+    if [ "$dur_min" -gt 0 ]; then
+        dur_label="${dur_min}m ${dur_s}s"
+    else
+        dur_label="${dur_s}s"
+    fi
+
     if [ "$DEBUG_MODE" = true ]; then
         echo "[DEBUG] Output file: $output_file"
         echo "[DEBUG] Would execute: $ffmpeg_cmd"
-        CREATED_SNIPPETS+=("$(basename "$output_file") (DEBUG MODE)")
+        CREATED_SNIPPETS+=("${safe_title} · ${dur_label} (DEBUG MODE)")
     else
         log_message "INFO" "Extracting: $(basename "$output_file") ($start_time to $end_time)"
-        
+
         if eval "$ffmpeg_cmd" 2>>"$LOG_FILE"; then
-            CREATED_SNIPPETS+=("$(basename "$output_file")")
+            CREATED_SNIPPETS+=("${safe_title} · ${dur_label}")
             log_message "INFO" "Successfully created: $(basename "$output_file")"
         else
             FAILED_SNIPPETS+=("$(basename "$output_file")")
