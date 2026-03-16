@@ -49,12 +49,7 @@ A sound plays and a desktop notification appears when extraction starts and comp
 
 ## Setup
 
-Run the setup script once to install all dependencies and register the Quick Actions:
-
-```bash
-chmod +x install.sh
-./install.sh
-```
+Double-click `install.command` once to install all dependencies and register the Quick Actions.
 
 This installs Homebrew (if needed), `ffmpeg`, `yt-dlp`, makes `ppsplit.sh` executable, and copies the Quick Actions to `~/Library/Services/`.
 
@@ -123,7 +118,7 @@ ppsplit/
 │       ├── special_chars.csv.txt
 │       ├── transitions_normal.csv.txt
 │       └── transitions_zero_start.csv.txt
-├── install.sh                          # One-time setup script
+├── install.command                     # One-time setup script (double-click to run)
 ├── ppsplit.sh                          # Extraction engine (called by Quick Action 3)
 ├── .gitignore
 ├── QUICKSTART.md                       # Quick reference for experienced users

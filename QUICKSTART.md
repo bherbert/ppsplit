@@ -1,6 +1,6 @@
 # Quick Start
 
-1. Run `./install.sh` (first time only)
+1. Double-click `install.command` (first time only)
 2. Create a session folder under `runs/` (e.g., `runs/2025-09-21/`)
 3. Right-click the session folder -> **Peace Pi Video Splitter - 1) Fetch YouTube video** — paste the URL when prompted
 4. Right-click the session folder -> **Peace Pi Video Splitter - 2) Create snippets CSV file** — edit `snippets.csv.txt` with one line per clip: `start,end,title`

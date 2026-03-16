@@ -73,10 +73,12 @@
 # - Millisecond timestamp support
 # - Robust extraction using awk-to-source method (fixes line-reading bugs)
 #
-# Usage: ppsplit.sh [-d] &lt;video_file&gt;
+# Usage: ppsplit.sh [-d] [-t] &lt;video_file&gt;
 #   -d: Debug mode (echo commands without executing)
+#   -t: Enable fade in/out transitions on each segment
 #
 # Requirements:
+# - macOS with stock Bash 3.2+ (no Bash 4 required)
 # - snippets.csv.txt file in same directory as video file
 # - ffmpeg and bc installed and accessible
 #
@@ -244,9 +246,9 @@ process_csv() {
     
     # Read CSV, removing carriage returns on the fly
     while IFS=',' read -r start_time end_time title || [ -n "$start_time" ]; do
-        ((line_num++))
+        ((++line_num))
         [ -z "$start_time" ] &amp;&amp; continue
-        [[ "$start_time" =~ ^[[:space:]]*# ]] &amp;&amp; { ((comment_count++)); continue; }
+        [[ "$start_time" =~ ^[[:space:]]*# ]] &amp;&amp; { ((++comment_count)); continue; }
         
         # Trim whitespace
         start_time=$(echo "$start_time" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -264,7 +266,7 @@ process_csv() {
         
         if (( $(echo "$start_sec &gt;= $end_sec" | bc -l) )); then
             log_message "WARN" "Line $line_num: Start time &gt;= End time - skipping"
-            SKIPPETS+=("Line $line_num: Start time &gt;= End time ($start_time &gt;= $end_time)")
+            SKIPPED_SNIPPETS+=("Line $line_num: Start time &gt;= End time ($start_time &gt;= $end_time)")
             continue
         fi
         
@@ -305,7 +307,7 @@ fix_overlapping_snippets() {
             log_message "WARN" "Fixed overlap: Adjusted start time from $start_time to $new_start_time for '$title'"
             start_time="$new_start_time"
             start_sec="$new_start_sec"
-            ((fixed_count++))
+            ((++fixed_count))
         fi
 
         if (( $(echo "$start_sec &lt; $end_sec" | bc -l) )); then
@@ -431,18 +433,18 @@ display_summary() {
         log_message "INFO" ""
     fi
     
-    if [ ${#REMOVED_FILES[@]} -gt 0 ]; then
-        log_message "INFO" "REMOVED FILES (${#REMOVED_FILES[@]}):"
-        for file in "${REMOVED_FILES[@]}"; do
-            log_message "INFO" "  🗑 $file"
-        done
-        log_message "INFO" ""
-    fi
-
     if [ ${#SKIPPED_SNIPPETS[@]} -gt 0 ]; then
         log_message "INFO" "SKIPPED ENTRIES (${#SKIPPED_SNIPPETS[@]}):"
         for snippet in "${SKIPPED_SNIPPETS[@]}"; do
             log_message "INFO" "  ⚠ $snippet"
+        done
+        log_message "INFO" ""
+    fi
+
+    if [ ${#REMOVED_FILES[@]} -gt 0 ]; then
+        log_message "INFO" "REMOVED FILES (${#REMOVED_FILES[@]}):"
+        for file in "${REMOVED_FILES[@]}"; do
+            log_message "INFO" "  🗑 $file"
         done
         log_message "INFO" ""
     fi
@@ -528,6 +530,7 @@ fi
 transition_answer=$(osascript -e 'button returned of (display dialog "Enable fade in/out transitions?" with title "Peace Pi Video Splitter" buttons {"No", "Yes"} default button "No")')
 if [[ "$transition_answer" == "Yes" ]]; then TRANSITIONS=true; fi
 
+START_EPOCH=$(date +%s)
 afplay /System/Library/Sounds/Funk.aiff
 osascript -e "display notification \"Video extraction started at: $(date +"%l:%M %p")\" with title \"Peace Pi Video Splitter\""
 
@@ -563,8 +566,11 @@ display_summary
 
 log_message "INFO" "Extraction process completed"
 
+ELAPSED=$(( $(date +%s) - START_EPOCH ))
+ELAPSED_MIN=$(( ELAPSED / 60 ))
+ELAPSED_SEC=$(( ELAPSED % 60 ))
 afplay /System/Library/Sounds/Glass.aiff
-osascript -e "display notification \"Video extraction ended at: $(date +"%l:%M %p")\" with title \"Peace Pi Video Splitter\""
+osascript -e "display notification \"Completed at $(date +"%l:%M %p") · ${ELAPSED_MIN}m ${ELAPSED_SEC}s elapsed\" with title \"Peace Pi Video Splitter\""
 
 exit 0</string>
 					<key>CheckedForUserDefaultShell</key>
