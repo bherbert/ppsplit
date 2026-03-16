@@ -1,0 +1,8 @@
+# Overlapping clips — script should auto-adjust start times
+# Clip B starts before Clip A ends (overlap by 30s)
+# Clip C is fully contained within Clip B after adjustment (should be skipped)
+# start-timestamp, end-timestamp, video-name
+0:10,1:00,Clip A
+0:45,1:30,Clip B Overlaps A
+0:50,0:55,Clip C Swallowed By B
+1:35,2:00,Clip D Clean

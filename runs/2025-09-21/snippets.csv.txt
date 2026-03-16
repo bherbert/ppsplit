@@ -1,3 +1,0 @@
-# start-timestamp, end-timestamp, video-name
-27:00,29:00,Random1
-7:58,19:55,Wallace&Ladmo

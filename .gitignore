@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Video files — source downloads and extracted clips
+# (test_video.mp4 in tests/fixtures is synthetic and safe to exclude)
+*.mp4
+
+# Runtime log files
+ppsplit.log
+
+# Temporary processing files written by ppsplit.sh
+temp_snippets_sorted.csv
+temp_snippets_fixed.csv
+temp_extract_script.sh
+
+# Vim swap files
+*.swp

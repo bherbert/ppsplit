@@ -73,30 +73,35 @@ if [ -z "$URL" ]; then
   exit 0
 fi
 
-######## Check URL for errors
+######## Extract video ID from URL (supports all common YouTube URL formats)
 
-# Ensure it's a YouTube URL with a "v" parameter
-if [[ "$URL" != https://www.youtube.com/watch?v=* ]]; then
-	osascript -e "display notification \"Invalid YouTube video URL format\" with title \"URL Error\" subtitle \"$URL\""
-	afplay $ERROR_SOUND
-	exit 0
+# Supported formats:
+#   https://www.youtube.com/watch?v=VIDEO_ID          (standard)
+#   https://www.youtube.com/watch?v=VIDEO_ID&amp;list=... (with extra params)
+#   https://www.youtube.com/watch?list=...&amp;v=VIDEO_ID (v param not first)
+#   https://youtu.be/VIDEO_ID                         (shortened)
+#   https://www.youtube.com/embed/VIDEO_ID            (embed)
+VIDEO_ID=""
+
+# Store patterns in variables to avoid bash 3.2 parser issues with &amp; in [[ =~ ]]
+RE_WATCH='[?&amp;]v=([^&amp;]+)'
+RE_SHORT='youtu\.be/([^?&amp;]+)'
+RE_EMBED='youtube\.com/embed/([^?&amp;]+)'
+
+if [[ "$URL" =~ $RE_WATCH ]]; then
+    VIDEO_ID="${BASH_REMATCH[1]}"
+elif [[ "$URL" =~ $RE_SHORT ]]; then
+    VIDEO_ID="${BASH_REMATCH[1]}"
+elif [[ "$URL" =~ $RE_EMBED ]]; then
+    VIDEO_ID="${BASH_REMATCH[1]}"
 fi
 
-# Ensure the v parameter has a value
-# Extract the v parameter value
-v_param=$(echo "$URL" | sed -n 's/.*[?&amp;]v=\([^&amp;]*\).*/\1/p')
-
-# Check if v_param is empty
-if [[ -z "$v_param" ]]; then
- 	echo "v parameter is missing or empty"
-	osascript -e "display notification \"Invalid YouTube video URL format: v parameter empty\" with title \"URL Error\" subtitle \"$URL\""
-	afplay $ERROR_SOUND
-else
-  echo "v parameter value: $v_param"
+if [[ -z "$VIDEO_ID" ]]; then
+    osascript -e "display notification \"Could not find a YouTube video ID in the URL\" with title \"URL Error\" subtitle \"$URL\""
+    afplay $ERROR_SOUND
+    exit 0
 fi
 
-# Ensure only the v parameter is present in the YouTube URL (don't want playlists)
-VIDEO_ID=$(echo "$URL" | sed -n 's/.*[?&amp;]v=\([^&amp;]*\).*/\1/p')
 NEW_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
 
 ######## Start processing
@@ -105,7 +110,15 @@ NEW_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
 VERBOSE=""  # or leave empty "" to disable verbose
 
 LOGFILE="$HOME/Library/Logs/yt-dlp.log"
-FFMPEG="--ffmpeg-location /usr/local/bin"
+
+# Detect architecture to select correct Homebrew prefix
+if [[ "$(uname -m)" == "arm64" ]]; then
+    HOMEBREW_BIN="/opt/homebrew/bin"
+else
+    HOMEBREW_BIN="/usr/local/bin"
+fi
+FFMPEG="--ffmpeg-location $HOMEBREW_BIN"
+YTDLP="$HOMEBREW_BIN/yt-dlp"
 
 echo "================ $(date '+%Y-%m-%d %H:%M:%S')" &gt;&gt; $LOGFILE
 echo "Input items: $@" &gt;&gt; $LOGFILE
@@ -115,7 +128,7 @@ for FOLDER in "$@"; do
 	afplay /System/Library/Sounds/Funk.aiff
 
     echo "Running script on folder: $FOLDER with URL: $NEW_URL"
-	/usr/local/bin/yt-dlp $VERBOSE --no-progress $FFMPEG -o "%(title)s.%(ext)s" -P "$FOLDER" -S res,ext:mp4:m4a --recode mp4 "$NEW_URL" &gt;&gt; $LOGFILE 2&gt;&amp;1
+	$YTDLP $VERBOSE --no-progress $FFMPEG -o "%(title)s.%(ext)s" -P "$FOLDER" -S res,ext:mp4:m4a --recode mp4 "$NEW_URL" &gt;&gt; $LOGFILE 2&gt;&amp;1
 
 	afplay /System/Library/Sounds/Glass.aiff
 done

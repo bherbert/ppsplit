@@ -1,0 +1,7 @@
+# Duplicate titles — should produce Song_1.mp4, Song_2.mp4, etc.
+# start-timestamp, end-timestamp, video-name
+0:05,0:30,Song
+0:35,1:00,Song
+1:05,1:30,Song
+1:35,2:00,Unique Title
+2:05,2:30,Song

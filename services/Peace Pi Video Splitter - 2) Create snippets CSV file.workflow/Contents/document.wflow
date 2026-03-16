@@ -62,18 +62,19 @@
 					<string># Loop through each selected folder
 for FOLDER in "$@"; do
     # Define the file name
-    FILE="$FOLDER/snippets.csv.txt" 
+    FILE="$FOLDER/snippets.csv.txt"
 
     # Create the file if it doesn't exist
     if [ ! -f "$FILE" ]; then
-        # echo "This is a placeholder README." &gt; "$FILE"
-		echo "# start-timestamp, end-timestamp, video-name" &gt; "$FILE"
-        echo "Created $FILE"
+        echo "# start-timestamp, end-timestamp, video-name" &gt; "$FILE"
+        echo "Created $FILE" &gt;&amp;2
     else
-        echo "$FILE already exists."
+        echo "$FILE already exists." &gt;&amp;2
     fi
-done
-echo $FILE</string>
+
+    # Output the file path to stdout for the Open Finder Items action
+    echo "$FILE"
+done</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>

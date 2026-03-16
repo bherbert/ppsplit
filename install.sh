@@ -28,8 +28,8 @@ fi
 # --- Required packages ---
 
 PACKAGES=(
-    bash    # Bash 4+ (macOS ships with Bash 3)
     ffmpeg  # Video cutting and re-encoding
+    yt-dlp  # YouTube video downloader (used by Quick Action 1)
 )
 
 echo ""
@@ -43,9 +43,25 @@ for pkg in "${PACKAGES[@]}"; do
     fi
 done
 
+# --- Verify bc (built-in macOS utility, not a Homebrew package) ---
+
+if [[ -x /usr/bin/bc ]]; then
+    echo "  bc already available: /usr/bin/bc"
+else
+    echo ""
+    echo "WARNING: /usr/bin/bc not found. bc is required by ppsplit.sh for"
+    echo "  timestamp arithmetic. It ships with macOS but appears to be missing."
+    echo "  Run: xcode-select --install  (or reinstall macOS Command Line Tools)"
+fi
+
+# --- Make scripts executable ---
+
+chmod +x "$SCRIPT_DIR/ppsplit.sh"
+echo "Made ppsplit.sh executable."
+
 # --- Quick Actions ---
 
-SERVICES_SRC="$SCRIPT_DIR/Services"
+SERVICES_SRC="$SCRIPT_DIR/services"
 SERVICES_DST="$HOME/Library/Services"
 
 if [[ -d "$SERVICES_SRC" ]]; then
@@ -69,7 +85,6 @@ echo "  Installation complete."
 echo ""
 echo "  ffmpeg path: $(brew --prefix ffmpeg)/bin/ffmpeg"
 echo ""
-echo "  NOTE: ppsplit.sh expects ffmpeg at /usr/local/bin/ffmpeg."
-echo "  If you are on Apple Silicon, update line 39 of ppsplit.sh to:"
-echo "    FFMPEG=\"/opt/homebrew/bin/ffmpeg\""
+echo "  ppsplit.sh auto-detects your Mac architecture and will use"
+echo "  the correct ffmpeg path for Intel or Apple Silicon."
 echo "=================================================="

@@ -1,0 +1,9 @@
+# Invalid timestamp formats — all should be skipped with WARN
+# start-timestamp, end-timestamp, video-name
+0:10,0:30,Valid Clip Before Errors
+99:99:99:99,1:00,Too Many Colons
+abc,1:00,Letters In Timestamp
+0:10,xyz,Letters In End Timestamp
+,1:00,Empty Start
+0:10,,Empty End
+0:30,1:00,Valid Clip After Errors

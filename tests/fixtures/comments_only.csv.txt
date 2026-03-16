@@ -1,0 +1,5 @@
+# Comments-only file — should produce zero extractions with clean exit
+# This tests graceful handling of an empty-but-valid CSV
+# start-timestamp, end-timestamp, video-name
+# 0:10,0:30,This line is commented out
+# 1:00,1:30,So is this one

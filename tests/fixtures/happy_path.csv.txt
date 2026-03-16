@@ -1,0 +1,6 @@
+# Happy path — clean valid entries covering multiple timestamp formats
+# start-timestamp, end-timestamp, video-name
+0:05,0:30,Short MM:SS Clip
+1:00,2:30,Second MM:SS Clip
+0:02:45,0:04:00,HH:MM:SS Clip
+0:04:05.500,0:04:30.250,Millisecond Precision Clip

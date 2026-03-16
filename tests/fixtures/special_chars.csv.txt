@@ -1,0 +1,5 @@
+# start-timestamp, end-timestamp, video-name
+0:10,0:40,Song: Part 1 (Intro)
+0:45,1:15,Live/Studio Mix
+1:20,1:50,Q&A Session
+1:55,2:25,Title with "Quotes"

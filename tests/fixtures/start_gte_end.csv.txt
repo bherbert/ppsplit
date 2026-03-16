@@ -1,0 +1,6 @@
+# Start >= End — all three should be skipped (tests the SKIPPED_SNIPPETS bug fix)
+# start-timestamp, end-timestamp, video-name
+0:10,0:30,Valid Clip
+1:00,0:45,Start After End
+2:00,2:00,Start Equals End
+0:45,1:30,Another Valid Clip

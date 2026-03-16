@@ -21,112 +21,6 @@
 					<true/>
 					<key>Types</key>
 					<array>
-						<string>com.apple.cocoa.path</string>
-					</array>
-				</dict>
-				<key>AMActionVersion</key>
-				<string>1.1.2</string>
-				<key>AMApplication</key>
-				<array>
-					<string>Finder</string>
-				</array>
-				<key>AMParameterProperties</key>
-				<dict>
-					<key>fileNames</key>
-					<dict/>
-				</dict>
-				<key>AMProvides</key>
-				<dict>
-					<key>Container</key>
-					<string>List</string>
-					<key>Types</key>
-					<array>
-						<string>com.apple.cocoa.path</string>
-					</array>
-				</dict>
-				<key>ActionBundlePath</key>
-				<string>/System/Library/Automator/Get Specified Finder Items.action</string>
-				<key>ActionName</key>
-				<string>Get Specified Finder Items</string>
-				<key>ActionParameters</key>
-				<dict>
-					<key>fileNames</key>
-					<array>
-						<string>~/projects/people/PeacePi/Test4/Peace Pi Traveling Medicine Show_Debut_ Live Stream_ 2nd Act.mp4</string>
-					</array>
-				</dict>
-				<key>BundleIdentifier</key>
-				<string>com.apple.Automator.SpecifiedFiles</string>
-				<key>CFBundleVersion</key>
-				<string>1.1.2</string>
-				<key>CanShowSelectedItemsWhenRun</key>
-				<false/>
-				<key>CanShowWhenRun</key>
-				<true/>
-				<key>Category</key>
-				<array>
-					<string>AMCategoryFilesAndFolders</string>
-				</array>
-				<key>Class Name</key>
-				<string>SpecifiedFilesAction</string>
-				<key>Disabled</key>
-				<true/>
-				<key>InputUUID</key>
-				<string>9B6BFD7F-5831-4E9F-BF7D-1FA883D97F45</string>
-				<key>Keywords</key>
-				<array>
-					<string>File</string>
-					<string>Choose</string>
-					<string>Find</string>
-					<string>Get</string>
-				</array>
-				<key>OutputUUID</key>
-				<string>CBBD124A-D816-481B-BA42-488040EA5DFC</string>
-				<key>UUID</key>
-				<string>695C2715-72A9-4C9E-9F9A-1179C0545CB5</string>
-				<key>UnlocalizedApplications</key>
-				<array>
-					<string>Finder</string>
-				</array>
-				<key>arguments</key>
-				<dict>
-					<key>0</key>
-					<dict>
-						<key>default value</key>
-						<array/>
-						<key>name</key>
-						<string>fileNames</string>
-						<key>required</key>
-						<string>0</string>
-						<key>type</key>
-						<string>0</string>
-						<key>uuid</key>
-						<string>0</string>
-					</dict>
-				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
-				<key>isViewVisible</key>
-				<integer>0</integer>
-				<key>location</key>
-				<string>620.000000:164.000000</string>
-				<key>nibPath</key>
-				<string>/System/Library/Automator/Get Specified Finder Items.action/Contents/Resources/Base.lproj/main.nib</string>
-			</dict>
-			<key>isViewVisible</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>action</key>
-			<dict>
-				<key>AMAccepts</key>
-				<dict>
-					<key>Container</key>
-					<string>List</string>
-					<key>Optional</key>
-					<true/>
-					<key>Types</key>
-					<array>
 						<string>com.apple.cocoa.string</string>
 					</array>
 				</dict>
@@ -203,7 +97,12 @@ TEMP_SCRIPT=""
 VIDEO_DIR=""
 
 # External Tool Paths
-FFMPEG="/usr/local/bin/ffmpeg"
+# Detect architecture to select correct Homebrew prefix
+if [[ "$(uname -m)" == "arm64" ]]; then
+    FFMPEG="/opt/homebrew/bin/ffmpeg"
+else
+    FFMPEG="/usr/local/bin/ffmpeg"
+fi
 BC="/usr/bin/bc"
 
 # Arrays for tracking results
@@ -593,12 +492,12 @@ fi
 VIDEO_FILE=$(realpath "$VIDEO_FILE")
 VIDEO_DIR=$(dirname "$VIDEO_FILE")
 CSV_FILE="$VIDEO_DIR/snippets.csv.txt"
-LOG_FILE="$VIDEO_DIR/ppsplit_errors.log"
+LOG_FILE="$VIDEO_DIR/ppsplit.log"
 TEMP_CSV="$VIDEO_DIR/temp_snippets_sorted.csv"
 TEMP_SCRIPT="$VIDEO_DIR/temp_extract_script.sh"
 
 if [ ! -f "$CSV_FILE" ]; then
-    echo "Error: CSV file 'snippets.csv.txt' not found in $VIDEO_DIR"
+    osascript -e 'display dialog "snippets.csv.txt was not found in the session folder. Please run Quick Action 2 to create and fill in the file, then try again." with title "Peace Pi Video Splitter" buttons {"OK"} default button "OK" with icon caution'
     exit 1
 fi
 
@@ -767,15 +666,8 @@ exit 0</string>
 		</dict>
 	</array>
 	<key>connectors</key>
-	<dict>
-		<key>84C1EDB5-68B5-4DAA-8EEC-A3C1874B5819</key>
-		<dict>
-			<key>from</key>
-			<string>695C2715-72A9-4C9E-9F9A-1179C0545CB5 - 695C2715-72A9-4C9E-9F9A-1179C0545CB5</string>
-			<key>to</key>
-			<string>94776186-04A2-4675-9F97-2BACBA29F69A - 94776186-04A2-4675-9F97-2BACBA29F69A</string>
-		</dict>
-	</dict>
+	<dict/>
+
 	<key>workflowMetaData</key>
 	<dict>
 		<key>applicationBundleID</key>
