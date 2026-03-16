@@ -1,4 +1,4 @@
-# PeacePi Video Splitter
+# Peace Pi Video Splitter
 
 A macOS Finder workflow for downloading Peace Pi Traveling Medicine Show live streams from YouTube and splitting them into individual titled clips — all driven from right-click Quick Actions.
 
@@ -15,6 +15,7 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference. | [GitHub](https://git
 - [Fade Transitions](#fade-transitions)
 - [Project Structure](#project-structure)
 - [Technical Reference](#technical-reference)
+- [Testing](#testing)
 
 ## The Workflow
 
