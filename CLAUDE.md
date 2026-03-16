@@ -1,3 +1,7 @@
+## General
+
+Never commit changes unless explicitly asked.
+
 ## ppsplit Script — Canonical Source Rule
 
 `bin/ppsplit.sh` is the **canonical version** of the extraction script. The same script is also embedded inside `services/Peace Pi Video Splitter - 3) Extract snippets from video.workflow/Contents/document.wflow` as the `COMMAND_STRING` value.

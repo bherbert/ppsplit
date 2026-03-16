@@ -19,14 +19,14 @@
 # Requirements:
 # - macOS with stock Bash 3.2+ (no Bash 4 required)
 # - snippets.csv.txt file in same directory as video file
-# - ffmpeg and bc installed and accessible
+# - ffmpeg installed and accessible
 #
 # CSV Format: starting-timestamp,ending-timestamp,video-title
 # Timestamp formats supported: HH:MM:SS, MM:SS, or HH:MM:SS.mmm, MM:SS.mmm
 # Lines beginning with # are ignored (comments)
 
 set -euo pipefail
-export LC_NUMERIC=C  # Force decimal point in bc regardless of system locale
+export LC_NUMERIC=C  # Force decimal point in float arithmetic regardless of system locale
 
 # --- 1. CONFIGURATION AND GLOBALS ---
 
@@ -40,16 +40,21 @@ TEMP_SCRIPT=""
 VIDEO_DIR=""
 
 # External Tool Paths
+# Check standalone install location first, then fall back to Homebrew
+PPSPLIT_BIN="$HOME/Library/Application Support/PeacePi/bin"
 FFMPEG=""
-for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-    [[ -x "$BREW_PATH" ]] && { FFMPEG="$("$BREW_PATH" --prefix)/bin/ffmpeg"; break; }
-done
+if [[ -x "$PPSPLIT_BIN/ffmpeg" ]]; then
+    FFMPEG="$PPSPLIT_BIN/ffmpeg"
+else
+    for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        [[ -x "$BREW_PATH" ]] && { FFMPEG="$("$BREW_PATH" --prefix)/bin/ffmpeg"; break; }
+    done
+fi
 if [[ -z "$FFMPEG" ]]; then
-    echo "Error: Homebrew not found at /opt/homebrew/bin/brew or /usr/local/bin/brew."
-    echo "  Install Homebrew from https://brew.sh, then run: brew install ffmpeg"
+    echo "Error: ffmpeg not found. Run install.command to install it."
     exit 1
 fi
-BC="/usr/bin/bc"
+AWK="/usr/bin/awk"
 
 # Arrays for tracking results
 declare -a CREATED_SNIPPETS=()
@@ -210,7 +215,7 @@ process_csv() {
             continue
         fi
         
-        if (( $(echo "$start_sec >= $end_sec" | bc -l) )); then
+        if (( $(awk "BEGIN {print ($start_sec >= $end_sec)}") )); then
             log_message "WARN" "Line $line_num: Start time >= End time - skipping"
             SKIPPED_SNIPPETS+=("Line $line_num: Start time >= End time ($start_time >= $end_time)")
             continue
@@ -247,7 +252,7 @@ fix_overlapping_snippets() {
     while IFS=',' read -r start_sec start_time end_time title; do
         local end_sec=$(timestamp_to_seconds "$end_time")
         
-        if (( $(echo "$start_sec < $prev_end_sec" | bc -l) )); then
+        if (( $(awk "BEGIN {print ($start_sec < $prev_end_sec)}") )); then
             local new_start_sec="$prev_end_sec"
             local new_start_time=$(seconds_to_timestamp "$new_start_sec")
             log_message "WARN" "Fixed overlap: Adjusted start time from $start_time to $new_start_time for '$title'"
@@ -256,7 +261,7 @@ fix_overlapping_snippets() {
             ((++fixed_count))
         fi
 
-        if (( $(echo "$start_sec < $end_sec" | bc -l) )); then
+        if (( $(awk "BEGIN {print ($start_sec < $end_sec)}") )); then
             echo "$start_sec,$start_time,$end_time,$title" >> "$temp_fixed"
             prev_end_sec="$end_sec"
         else
@@ -293,13 +298,13 @@ extract_snippet() {
         local start_sec end_sec adj_start_sec adj_end_sec adj_start_time adj_end_time duration fade_out_start
         start_sec=$(timestamp_to_seconds "$start_time")
         end_sec=$(timestamp_to_seconds "$end_time")
-        adj_start_sec=$(echo "$start_sec - 1" | "$BC")
-        adj_end_sec=$(echo "$end_sec + 1" | "$BC")
-        if [ "$(echo "$adj_start_sec < 0" | "$BC")" = "1" ]; then adj_start_sec=0; fi
+        adj_start_sec=$(awk "BEGIN {print ($start_sec - 1)}")
+        adj_end_sec=$(awk "BEGIN {print ($end_sec + 1)}")
+        if (( $(awk "BEGIN {print ($adj_start_sec < 0)}") )); then adj_start_sec=0; fi
         adj_start_time=$(seconds_to_timestamp "$adj_start_sec")
         adj_end_time=$(seconds_to_timestamp "$adj_end_sec")
-        duration=$(echo "$adj_end_sec - $adj_start_sec" | "$BC")
-        fade_out_start=$(echo "$duration - 1" | "$BC")
+        duration=$(awk "BEGIN {print ($adj_end_sec - $adj_start_sec)}")
+        fade_out_start=$(awk "BEGIN {print ($duration - 1)}")
         ffmpeg_cmd="$FFMPEG -y -ss $adj_start_time -to $adj_end_time -i \"$VIDEO_FILE\" \
     -vf \"fade=t=in:st=0:d=1,fade=t=out:st=${fade_out_start}:d=1\" \
     -af \"afade=t=in:st=0:d=1,afade=t=out:st=${fade_out_start}:d=1\" \
@@ -311,7 +316,7 @@ extract_snippet() {
     
     # Compute user-visible duration (always from the original timestamps, not the transitions window)
     local dur_sec dur_min dur_s dur_label
-    dur_sec=$(echo "$(timestamp_to_seconds "$end_time") - $(timestamp_to_seconds "$start_time")" | "$BC")
+    dur_sec=$(awk "BEGIN {print ($(timestamp_to_seconds "$end_time") - $(timestamp_to_seconds "$start_time"))}")
     dur_sec=${dur_sec%%.*}
     dur_min=$(( dur_sec / 60 ))
     dur_s=$(( dur_sec % 60 ))
@@ -472,16 +477,16 @@ VIDEO_FILE=$(realpath "$VIDEO_FILE")
 VIDEO_DIR=$(dirname "$VIDEO_FILE")
 CSV_FILE="$VIDEO_DIR/snippets.csv.txt"
 LOG_FILE="$VIDEO_DIR/ppsplit.log"
-TEMP_CSV="$VIDEO_DIR/temp_snippets_sorted.csv"
-TEMP_SCRIPT="$VIDEO_DIR/temp_extract_script.sh"
+TEMP_CSV="/tmp/ppsplit_snippets_sorted_$$.csv"
+TEMP_SCRIPT="/tmp/ppsplit_extract_script_$$.sh"
 
 if [ ! -f "$CSV_FILE" ]; then
     echo "Error: CSV file 'snippets.csv.txt' not found in $VIDEO_DIR"
     exit 1
 fi
 
-if { [ ! -x "$FFMPEG" ] || [ ! -x "$BC" ]; } && [ "$DEBUG_MODE" = false ]; then
-    echo "Error: Required tool(s) (ffmpeg at $FFMPEG or bc at $BC) not found."
+if [ ! -x "$FFMPEG" ] && [ "$DEBUG_MODE" = false ]; then
+    echo "Error: Required tool ffmpeg not found at $FFMPEG."
     exit 1
 fi
 

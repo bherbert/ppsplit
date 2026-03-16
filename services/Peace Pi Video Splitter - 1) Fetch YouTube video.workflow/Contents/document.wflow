@@ -66,7 +66,7 @@ ERROR_SOUND=/System/Library/Sounds/Sosumi.aiff
 ######## Get YouTube video URL
 
 # Ask for URL with a custom message + title
-URL=$(osascript -e 'Tell application "System Events" to display dialog "Enter the YouTube URL to process for this folder:" default answer ""' 2&gt;/dev/null \
+URL=$(osascript -e 'display dialog "Enter the YouTube URL to process for this folder:" default answer "" with title "Peace Pi Video Splitter"' \
     -e 'text returned of result' 2&gt;/dev/null)
 if [ -z "$URL" ]; then
   echo "User canceled. Exiting."
@@ -106,16 +106,28 @@ NEW_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
 
 ######## Start processing
 
-#VERBOSE="-v"  # or leave empty "" to disable verbose
-VERBOSE=""  # or leave empty "" to disable verbose
+VERBOSE=""
+
+PPSPLIT_BIN="$HOME/Library/Application Support/PeacePi/bin"
+if [[ -x "$PPSPLIT_BIN/yt-dlp" ]]; then
+    YTDLP="$PPSPLIT_BIN/yt-dlp"
+    FFMPEG="--ffmpeg-location $PPSPLIT_BIN"
+else
+    HOMEBREW_BIN=""
+    for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+        [[ -x "$BREW_PATH" ]] &amp;&amp; { HOMEBREW_BIN="$("$BREW_PATH" --prefix)/bin"; break; }
+    done
+    FFMPEG="--ffmpeg-location $HOMEBREW_BIN"
+    YTDLP="$HOMEBREW_BIN/yt-dlp"
+fi
+
+if [[ ! -x "$YTDLP" ]]; then
+    osascript -e 'display dialog "yt-dlp was not found. Please run install.command again to reinstall it." with title "Peace Pi Video Splitter" buttons {"OK"} default button "OK" with icon caution'
+    exit 1
+fi
 
 LOGFILE="$HOME/Library/Logs/yt-dlp.log"
-
-for BREW_PATH in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-    [[ -x "$BREW_PATH" ]] &amp;&amp; { HOMEBREW_BIN="$("$BREW_PATH" --prefix)/bin"; break; }
-done
-FFMPEG="--ffmpeg-location $HOMEBREW_BIN"
-YTDLP="$HOMEBREW_BIN/yt-dlp"
+mkdir -p "$(dirname "$LOGFILE")"
 
 echo "================ $(date '+%Y-%m-%d %H:%M:%S')" &gt;&gt; $LOGFILE
 echo "Input items: $@" &gt;&gt; $LOGFILE

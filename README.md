@@ -13,6 +13,8 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference. | [GitHub](https://git
 - [YouTube URL Format](#youtube-url-format)
 - [CSV Format](#csv-format)
 - [Fade Transitions](#fade-transitions)
+- [In-process Notifications](#in-process-notifications)
+- [System Compatibility](#system-compatibility)
 - [Project Structure](#project-structure)
 - [Technical Reference](#technical-reference)
 - [Testing](#testing)
@@ -49,6 +51,8 @@ Right-click the video file (not the session folder) to access this action:
 3. **Peace Pi Video Splitter - 3) Extract snippets from video** — reads `snippets.csv.txt` from the same folder, extracts each clip using FFmpeg, and saves them as individual `.mp4` files. At startup, a dialog prompts whether to enable **fade transitions** (see [Fade Transitions](#fade-transitions)).
 
 A sound plays and a desktop notification appears when extraction starts and completes, and for each individual segment as it begins. A log file (`ppsplit.log`) is written to the session folder.
+
+**This step can be run as many times as needed.** Any `.mp4` snippets from a previous run are deleted before extraction begins, so editing `snippets.csv.txt` — to adjust a timestamp, rename a clip, add or remove entries — and re-running this action will produce a clean, updated set of clips.
 
 ## Setup
 
@@ -139,6 +143,35 @@ If the segment starts within 1 second of the beginning of the source video, the 
 
 The `-t` flag can also enable transitions when running `bin/ppsplit.sh` directly from the command line (see below).
 
+## In-process Notifications
+
+Quick Action 3 posts macOS desktop notifications at three points during extraction:
+
+- When extraction **starts**
+- When each **individual clip** begins
+- When extraction **completes**
+
+These notifications are sent via `osascript`. The first time Quick Action 3 runs, macOS adds the notification source to System Settings automatically. If notifications are not appearing after your first run, check manually:
+
+1. Open **System Settings → Notifications** (macOS 13 Ventura or later) or **System Preferences → Notifications & Focus** (macOS 12 Monterey or earlier)
+2. Scroll down and look for **Script Editor** or **Automator** in the app list
+3. Make sure notifications are not set to **Off**
+
+Once enabled, notifications will appear in the top-right corner of your screen and in Notification Center throughout the extraction run.
+
+## System Compatibility
+
+Peace Pi Video Splitter is designed to run on a wide range of Macs, including older Intel machines and older macOS versions. Every reasonable effort has been made to ensure installation goes smoothly regardless of hardware or software vintage.
+
+**Known areas of extra care:**
+
+- **Intel Macs** — Homebrew installs to a different location on Intel (`/usr/local`) than on Apple Silicon (`/opt/homebrew`). The installer and scripts detect both and handle each correctly.
+- **Older macOS versions** — Some macOS features used by the installer (Quick Action registration, notification permissions, plist keys) behave differently across versions. The installer detects the macOS version and applies the appropriate settings for each.
+- **Xcode Command Line Tools** — The standard installation path uses Homebrew, which requires Xcode Command Line Tools (~1–2 GB). If these tools are not installed, the installer detects this automatically and offers a lightweight standalone alternative (~60 MB) that requires no Xcode tools at all.
+- **Outdated Homebrew** — If Homebrew is present but too old to run on the current macOS version, the installer detects this, explains the problem, and offers to update it automatically before continuing.
+
+Despite these safeguards, installation issues can still occur — particularly on Macs with unusual software configurations, non-standard Homebrew setups, or macOS versions that have not yet been tested. If you run into a problem, please contact the developer for assistance.
+
 ## Project Structure
 
 ```
@@ -174,8 +207,7 @@ ppsplit/
 |------|--------|---------|
 | `ffmpeg` | Homebrew (`brew install ffmpeg`) | Video cutting and re-encoding |
 | `yt-dlp` | Homebrew (`brew install yt-dlp`) | YouTube video downloader (Quick Action 1) |
-| `bc` | macOS built-in | Floating-point timestamp comparison |
-| `awk` | macOS built-in | CSV parsing and script generation |
+| `awk` | macOS built-in | CSV parsing, floating-point timestamp arithmetic, and script generation |
 | `sort` | macOS built-in | Chronological ordering of snippets |
 | `afplay` | macOS built-in | Audio cue on start/finish |
 | `osascript` | macOS built-in | Desktop notification on start/finish |
@@ -185,7 +217,7 @@ ppsplit/
 | Tool | Value |
 |------|-------|
 | FFmpeg | Auto-detected via `brew --prefix` (works on any Homebrew installation) |
-| bc | `/usr/bin/bc` |
+| awk | `/usr/bin/awk` (macOS built-in) |
 
 ### Direct Script Usage
 
