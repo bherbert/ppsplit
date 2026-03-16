@@ -11,8 +11,8 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference.
 - [YouTube URL Format](#youtube-url-format)
 - [CSV Format](#csv-format)
 - [Project Structure](#project-structure)
+- [Fade Transitions](#fade-transitions)
 - [Technical Reference](#technical-reference)
-  - [Fade Transitions](#fade-transitions)
 
 ## The Workflow
 
@@ -105,12 +105,11 @@ ppsplit/
 │   └── SampleRun/                      # Example session (ready to use)
 │       ├── url.txt                     # YouTube URL for this session
 │       ├── snippets.csv.txt            # Timestamp definitions for this session
-│       ├── README.md                   # Step-by-step guide for this session
-│       └── ppsplit.log                 # Runtime log (generated on extraction)
+│       └── README.md                   # Step-by-step guide for this session
 ├── tests/                              # Automated test suites
 │   ├── run_all_tests.sh                # Runs all suites
-│   ├── test_url_parser.sh              # Layer 1: URL parsing (13 cases)
-│   ├── test_ppsplit_debug.sh           # Layer 2: CSV/extraction logic (7 cases)
+│   ├── test_url_parser.sh              # Layer 1: URL parsing
+│   ├── test_ppsplit_debug.sh           # Layer 2: CSV/extraction logic
 │   ├── COVERAGE.md                     # Test coverage report
 │   └── fixtures/                       # Test input files
 │       ├── test_video.mp4              # Synthetic test video (generated once)
@@ -121,7 +120,9 @@ ppsplit/
 │       ├── duplicate_titles.csv.txt
 │       ├── comments_only.csv.txt
 │       ├── windows_line_endings.csv.txt
-│       └── special_chars.csv.txt
+│       ├── special_chars.csv.txt
+│       ├── transitions_normal.csv.txt
+│       └── transitions_zero_start.csv.txt
 ├── install.sh                          # One-time setup script
 ├── ppsplit.sh                          # Extraction engine (called by Quick Action 3)
 ├── .gitignore
@@ -129,28 +130,7 @@ ppsplit/
 └── README.md
 ```
 
-## Technical Reference
-
-### Dependencies
-
-| Tool | Source | Purpose |
-|------|--------|---------|
-| `ffmpeg` | Homebrew (`brew install ffmpeg`) | Video cutting and re-encoding |
-| `yt-dlp` | Homebrew (`brew install yt-dlp`) | YouTube video downloader (Quick Action 1) |
-| `bc` | macOS built-in | Floating-point timestamp comparison |
-| `awk` | macOS built-in | CSV parsing and script generation |
-| `sort` | macOS built-in | Chronological ordering of snippets |
-| `afplay` | macOS built-in | Audio cue on start/finish |
-| `osascript` | macOS built-in | Desktop notification on start/finish |
-
-### Tool Paths
-
-| Tool | Value |
-|------|-------|
-| FFmpeg | Auto-detected via `brew --prefix` (works on any Homebrew installation) |
-| bc | `/usr/bin/bc` |
-
-### Fade Transitions
+## Fade Transitions
 
 Quick Action 3 prompts at startup:
 
@@ -172,6 +152,27 @@ To ensure the fade covers only the intended content boundaries, the extraction w
 If the segment starts within 1 second of the beginning of the source video, the adjusted start is clamped to `0`.
 
 The `-t` flag can also enable transitions when running `ppsplit.sh` directly from the command line (see below).
+
+## Technical Reference
+
+### Dependencies
+
+| Tool | Source | Purpose |
+|------|--------|---------|
+| `ffmpeg` | Homebrew (`brew install ffmpeg`) | Video cutting and re-encoding |
+| `yt-dlp` | Homebrew (`brew install yt-dlp`) | YouTube video downloader (Quick Action 1) |
+| `bc` | macOS built-in | Floating-point timestamp comparison |
+| `awk` | macOS built-in | CSV parsing and script generation |
+| `sort` | macOS built-in | Chronological ordering of snippets |
+| `afplay` | macOS built-in | Audio cue on start/finish |
+| `osascript` | macOS built-in | Desktop notification on start/finish |
+
+### Tool Paths
+
+| Tool | Value |
+|------|-------|
+| FFmpeg | Auto-detected via `brew --prefix` (works on any Homebrew installation) |
+| bc | `/usr/bin/bc` |
 
 ### Direct Script Usage
 
