@@ -133,18 +133,7 @@ ppsplit/
 │   ├── test_url_parser.sh              # Layer 1: URL parsing
 │   ├── test_ppsplit_debug.sh           # Layer 2: CSV/extraction logic
 │   ├── COVERAGE.md                     # Test coverage report
-│   └── fixtures/                       # Test input files
-│       ├── test_video.mp4              # Synthetic test video (generated once)
-│       ├── happy_path.csv.txt
-│       ├── overlapping.csv.txt
-│       ├── invalid_timestamps.csv.txt
-│       ├── start_gte_end.csv.txt
-│       ├── duplicate_titles.csv.txt
-│       ├── comments_only.csv.txt
-│       ├── windows_line_endings.csv.txt
-│       ├── special_chars.csv.txt
-│       ├── transitions_normal.csv.txt
-│       └── transitions_zero_start.csv.txt
+│   └── fixtures/                       # Test input files (CSV fixtures + synthetic video)
 ├── install.command                     # One-time setup script (double-click to run)
 ├── ppsplit.sh                          # Extraction engine (called by Quick Action 3)
 ├── .gitignore
