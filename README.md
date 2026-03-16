@@ -9,6 +9,7 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference.
 - [The Workflow](#the-workflow)
 - [Setup](#setup)
 - [Sample Run](#sample-run)
+- [Other Video Files](#other-video-files)
 - [YouTube URL Format](#youtube-url-format)
 - [CSV Format](#csv-format)
 - [Fade Transitions](#fade-transitions)
@@ -66,6 +67,14 @@ The folder already contains a `snippets.csv.txt` with two clips defined — no e
 4. **Right-click the downloaded `.mp4`** and run **Quick Action 3** to extract the two sample clips
 
 The extracted clips will appear alongside the source video in `runs/SampleRun/`. This is a safe place to experiment — nothing outside this folder is affected.
+
+## Other Video Files
+
+Quick Actions 2 and 3 work on any video file — not just YouTube downloads. If you already have a recording on disk, skip Quick Action 1 entirely: copy the file into a session folder and pick up from Quick Action 2.
+
+FFmpeg handles all common formats as input (`.mp4`, `.mov`, `.mkv`, `.m4v`, and most broadcast formats). The extracted clips are always written as `.mp4`.
+
+Timestamps work the same way regardless of source — open the file in QuickLook or QuickTime Player, scrub to each cut point, and note the time shown in the playback bar.
 
 ## YouTube URL Format
 
