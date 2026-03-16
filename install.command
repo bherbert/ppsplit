@@ -97,7 +97,6 @@ if [[ -d "$SERVICES_SRC" ]]; then
         # On older macOS the key is kept to preserve Finder-only scoping.
         if [[ $(sw_vers -productVersion | cut -d. -f1) -ge 26 ]]; then
             plutil -remove NSServices.0.NSRequiredContext "$wf/Contents/Info.plist" 2>/dev/null || true
-            echo "    (macOS 26+: removed NSRequiredContext for Quick Actions compatibility)"
         fi
     done
     echo "  Installed:"
