@@ -12,6 +12,7 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference.
 - [CSV Format](#csv-format)
 - [Project Structure](#project-structure)
 - [Technical Reference](#technical-reference)
+  - [Fade Transitions](#fade-transitions)
 
 ## The Workflow
 
@@ -42,9 +43,9 @@ At this point, the previous two steps have prepared everything needed for proces
 
 Right-click the video file (not the session folder) to access this action:
 
-3. **Peace Pi Video Splitter - 3) Extract snippets from video** — reads `snippets.csv.txt` from the same folder, extracts each clip using FFmpeg, and saves them as individual `.mp4` files
+3. **Peace Pi Video Splitter - 3) Extract snippets from video** — reads `snippets.csv.txt` from the same folder, extracts each clip using FFmpeg, and saves them as individual `.mp4` files. At startup, a dialog prompts whether to enable **fade transitions** (see [Fade Transitions](#fade-transitions)).
 
-A sound plays and a desktop notification appears when extraction starts and completes. A log file (`ppsplit.log`) is written to the session folder.
+A sound plays and a desktop notification appears when extraction starts and completes, and for each individual segment as it begins. A log file (`ppsplit.log`) is written to the session folder.
 
 ## Setup
 
@@ -149,6 +150,29 @@ ppsplit/
 | FFmpeg | Auto-detected via `brew --prefix` (works on any Homebrew installation) |
 | bc | `/usr/bin/bc` |
 
+### Fade Transitions
+
+Quick Action 3 prompts at startup:
+
+> **"Enable fade in/out transitions?"** — Yes / No (default: No)
+
+When enabled, each extracted segment receives a 1-second **fade-in from black** at the start and a 1-second **fade-out to black** at the end.
+
+To ensure the fade covers only the intended content boundaries, the extraction window is automatically expanded by 1 second on each side:
+
+| | Without transitions | With transitions |
+|---|---|---|
+| Extraction start | `start_time` | `start_time − 1s` |
+| Extraction end | `end_time` | `end_time + 1s` |
+| Fade-in | — | frames 0–1s of extracted clip |
+| Fade-out | — | final 1s of extracted clip |
+
+**Example:** a segment defined as `13:00 → 14:50` is extracted from `12:59 → 14:51`. The fade-in covers `12:59–13:00` and the fade-out covers `14:50–14:51`. The content at full brightness is still exactly `13:00–14:50`.
+
+If the segment starts within 1 second of the beginning of the source video, the adjusted start is clamped to `0`.
+
+The `-t` flag can also enable transitions when running `ppsplit.sh` directly from the command line (see below).
+
 ### Direct Script Usage
 
 `ppsplit.sh` can also be run directly from the command line:
@@ -156,6 +180,8 @@ ppsplit/
 ```bash
 ./ppsplit.sh <video_file>          # normal run
 ./ppsplit.sh -d <video_file>       # debug mode (prints commands, no execution)
+./ppsplit.sh -t <video_file>       # enable fade in/out transitions
+./ppsplit.sh -d -t <video_file>    # debug mode with transitions
 ./ppsplit.sh -h                    # help
 ```
 
@@ -163,8 +189,9 @@ ppsplit/
 
 ```
 $ ./ppsplit.sh -h
-Usage: ppsplit.sh [-d] <video_file>
+Usage: ppsplit.sh [-d] [-t] <video_file>
   -d: Debug mode (show commands without executing)
+  -t: Enable fade in/out transitions on each segment
 See script header for file format details.
 ```
 
@@ -210,7 +237,7 @@ Then run:
 ./tests/test_ppsplit_debug.sh
 ```
 
-Runs 8 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFmpeg commands without executing):
+Runs 11 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFmpeg commands without executing):
 
 | Fixture | What it tests |
 |---------|--------------|
@@ -222,3 +249,5 @@ Runs 8 CSV fixture scenarios through `ppsplit.sh -d` (debug mode — prints FFmp
 | `comments_only.csv.txt` | Zero extractions with clean exit |
 | `windows_line_endings.csv.txt` | CRLF line endings handled correctly |
 | `special_chars.csv.txt` | Titles with `:`, `/`, `&`, `"` sanitized to safe filenames |
+| `transitions_normal.csv.txt` | `-t` flag injects fade filters; extraction window shifted back 1 second |
+| `transitions_zero_start.csv.txt` | `-t` flag with `0:00` start — adjusted start clamped to `00:00:00` (not negative) |

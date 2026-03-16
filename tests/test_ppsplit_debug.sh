@@ -105,6 +105,39 @@ run_fixture_expect_summary() {
     fi
 }
 
+run_fixture_with_flags_expect_pattern() {
+    local fixture_name="$1"
+    local description="$2"
+    local extra_flags="$3"      # additional flags to pass to ppsplit.sh (e.g. "-t")
+    local expect_pattern="$4"   # grep pattern that must appear in output
+
+    local fixture_file="$FIXTURES_DIR/$fixture_name"
+
+    if [[ ! -f "$fixture_file" ]]; then
+        echo -e "  ${RED}SKIP${NC}  $description (fixture not found: $fixture_name)"
+        return
+    fi
+
+    cp "$fixture_file" "$FIXTURES_DIR/snippets.csv.txt"
+
+    local output
+    output=$(bash "$PPSPLIT" -d $extra_flags "$TEST_VIDEO" 2>&1)
+    local exit_code=$?
+
+    rm -f "$FIXTURES_DIR/snippets.csv.txt"
+    rm -f "$FIXTURES_DIR/ppsplit.log"
+
+    if [[ $exit_code -eq 0 ]] && echo "$output" | grep -q "$expect_pattern"; then
+        echo -e "  ${GREEN}PASS${NC}  $description"
+        ((PASS++))
+    else
+        echo -e "  ${RED}FAIL${NC}  $description"
+        echo "        Expected pattern: '$expect_pattern'"
+        echo "$output" | sed 's/^/        /'
+        ((FAIL++))
+    fi
+}
+
 # --- Test cases ---
 
 echo ""
@@ -149,6 +182,24 @@ run_fixture_expect_summary \
     "special_chars.csv.txt" \
     "Special chars in titles (colons, slashes, quotes) — sanitized correctly" \
     "CREATED SNIPPETS (4)"
+
+run_fixture_with_flags_expect_pattern \
+    "transitions_normal.csv.txt" \
+    "Transitions (-t) — fade filter present in ffmpeg command" \
+    "-t" \
+    "fade=t=in"
+
+run_fixture_with_flags_expect_pattern \
+    "transitions_normal.csv.txt" \
+    "Transitions (-t) — extraction start shifted back 1 second (1:00 → 00:00:59)" \
+    "-t" \
+    "\-ss 00:00:59"
+
+run_fixture_with_flags_expect_pattern \
+    "transitions_zero_start.csv.txt" \
+    "Transitions (-t) — zero start clamped to 00:00:00 (not negative)" \
+    "-t" \
+    "\-ss 00:00:00"
 
 # --- Summary ---
 

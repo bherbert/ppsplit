@@ -48,8 +48,11 @@ Requires: `tests/fixtures/test_video.mp4` (5-minute synthetic video, generated o
 | 6 | `comments_only.csv.txt` | CSV with only comment lines | `CREATED SNIPPETS (0)` — clean exit with zero extractions |
 | 7 | `windows_line_endings.csv.txt` | CRLF line endings (`\r\n`) | Script exits 0; `tr -d '\r'` strips correctly |
 | 8 | `special_chars.csv.txt` | Titles with `:`, `/`, `&`, `"` | `CREATED SNIPPETS (4)` — sanitize_filename handles all |
+| 9 | `transitions_normal.csv.txt` | `-t` flag — fade filter injected into ffmpeg command | `fade=t=in` present in debug output |
+| 10 | `transitions_normal.csv.txt` | `-t` flag — extraction window shifted back 1 second | `-ss 00:00:59` present (segment `1:00` → adjusted to `0:59`) |
+| 11 | `transitions_zero_start.csv.txt` | `-t` flag — segment starting at `0:00`, adjusted start clamped | `-ss 00:00:00` present (not negative) |
 
-**Total: 8 fixture scenarios**
+**Total: 11 fixture scenarios**
 
 ---
 

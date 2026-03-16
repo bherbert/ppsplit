@@ -12,8 +12,9 @@
 # - Millisecond timestamp support
 # - Robust extraction using awk-to-source method (fixes line-reading bugs)
 #
-# Usage: ppsplit.sh [-d] <video_file>
+# Usage: ppsplit.sh [-d] [-t] <video_file>
 #   -d: Debug mode (echo commands without executing)
+#   -t: Enable fade in/out transitions on each segment
 #
 # Requirements:
 # - macOS with stock Bash 3.2+ (no Bash 4 required)
@@ -29,6 +30,7 @@ set -euo pipefail
 # --- 1. CONFIGURATION AND GLOBALS ---
 
 DEBUG_MODE=false
+TRANSITIONS=false
 VIDEO_FILE=""
 CSV_FILE=""
 LOG_FILE=""
@@ -67,8 +69,9 @@ log_message() {
 # Purpose: Prints the correct usage syntax of the script and exits.
 # Parameters: None
 usage() {
-    echo "Usage: $0 [-d] <video_file>"
+    echo "Usage: $0 [-d] [-t] <video_file>"
     echo "  -d: Debug mode (show commands without executing)"
+    echo "  -t: Enable fade in/out transitions on each segment"
     echo "See script header for file format details."
     exit 1
 }
@@ -278,8 +281,26 @@ extract_snippet() {
     local safe_title=$(sanitize_filename "$title")
     local output_file=$(get_unique_filename "$safe_title")
     
-	local ffmpeg_cmd="$FFMPEG -y -ss $start_time -to $end_time -i \"$VIDEO_FILE\" \
+    local ffmpeg_cmd
+    if [ "$TRANSITIONS" = true ]; then
+        local start_sec end_sec adj_start_sec adj_end_sec adj_start_time adj_end_time duration fade_out_start
+        start_sec=$(timestamp_to_seconds "$start_time")
+        end_sec=$(timestamp_to_seconds "$end_time")
+        adj_start_sec=$(echo "$start_sec - 1" | "$BC")
+        adj_end_sec=$(echo "$end_sec + 1" | "$BC")
+        if [ "$(echo "$adj_start_sec < 0" | "$BC")" = "1" ]; then adj_start_sec=0; fi
+        adj_start_time=$(seconds_to_timestamp "$adj_start_sec")
+        adj_end_time=$(seconds_to_timestamp "$adj_end_sec")
+        duration=$(echo "$adj_end_sec - $adj_start_sec" | "$BC")
+        fade_out_start=$(echo "$duration - 1" | "$BC")
+        ffmpeg_cmd="$FFMPEG -y -ss $adj_start_time -to $adj_end_time -i \"$VIDEO_FILE\" \
+    -vf \"fade=t=in:st=0:d=1,fade=t=out:st=${fade_out_start}:d=1\" \
+    -af \"afade=t=in:st=0:d=1,afade=t=out:st=${fade_out_start}:d=1\" \
     -c:v libx264 -c:a aac -hide_banner -loglevel error -nostats \"$output_file\""
+    else
+        ffmpeg_cmd="$FFMPEG -y -ss $start_time -to $end_time -i \"$VIDEO_FILE\" \
+    -c:v libx264 -c:a aac -hide_banner -loglevel error -nostats \"$output_file\""
+    fi
     
     if [ "$DEBUG_MODE" = true ]; then
         echo "[DEBUG] Would execute: $ffmpeg_cmd"
@@ -409,6 +430,7 @@ trap cleanup EXIT
 while [[ $# -gt 0 ]]; do
     case $1 in
         -d|--debug) DEBUG_MODE=true; shift ;;
+        -t|--transitions) TRANSITIONS=true; shift ;;
         -h|--help) usage ;;
         *)
             if [ -z "$VIDEO_FILE" ]; then
