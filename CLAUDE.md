@@ -1,11 +1,11 @@
 ## ppsplit Script — Canonical Source Rule
 
-`ppsplit.sh` is the **canonical version** of the extraction script. The same script is also embedded inside `services/Peace Pi Video Splitter - 3) Extract snippets from video.workflow/Contents/document.wflow` as the `COMMAND_STRING` value.
+`bin/ppsplit.sh` is the **canonical version** of the extraction script. The same script is also embedded inside `services/Peace Pi Video Splitter - 3) Extract snippets from video.workflow/Contents/document.wflow` as the `COMMAND_STRING` value.
 
 ### When editing the script
 
-1. **Always edit `ppsplit.sh` first.**
-2. After any change to `ppsplit.sh`, immediately sync the corresponding change into the `COMMAND_STRING` in `document.wflow`.
+1. **Always edit `bin/ppsplit.sh` first.**
+2. After any change to `bin/ppsplit.sh`, immediately sync the corresponding change into the `COMMAND_STRING` in `document.wflow`.
 3. When writing to the workflow XML, all shell special characters must be XML-escaped:
    - `&` → `&amp;`
    - `<` → `&lt;`

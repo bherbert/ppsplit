@@ -69,7 +69,7 @@ fi
 
 # --- Make scripts executable ---
 
-chmod +x "$SCRIPT_DIR/ppsplit.sh"
+chmod +x "$SCRIPT_DIR/bin/ppsplit.sh"
 
 # --- Quick Actions ---
 

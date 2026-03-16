@@ -8,6 +8,7 @@ See [QUICKSTART.md](QUICKSTART.md) for a quick reference.
 
 - [The Workflow](#the-workflow)
 - [Setup](#setup)
+- [Sample Run](#sample-run)
 - [YouTube URL Format](#youtube-url-format)
 - [CSV Format](#csv-format)
 - [Fade Transitions](#fade-transitions)
@@ -29,7 +30,7 @@ Create a new folder to hold the video and all its extracted clips. Name it by da
 Right-click the session folder (not a file inside it) to access these two initialization actions:
 
 1. **Peace Pi Video Splitter - 1) Fetch YouTube video** — prompts for a YouTube URL and downloads the video into the selected folder using `yt-dlp`
-2. **Peace Pi Video Splitter - 2) Create snippets CSV file** — creates a `snippets.csv.txt` template in the selected folder and opens it in TextEdit for editing
+2. **Peace Pi Video Splitter - 2) Create snippets CSV file** — opens `snippets.csv.txt` in TextEdit for editing; creates the file first if it doesn't already exist
 
 **Step 2 — Identify timestamps and fill in `snippets.csv.txt`:**
 
@@ -51,7 +52,20 @@ A sound plays and a desktop notification appears when extraction starts and comp
 
 Double-click `install.command` once to install all dependencies and register the Quick Actions.
 
-This installs Homebrew (if needed), `ffmpeg`, `yt-dlp`, makes `ppsplit.sh` executable, and copies the Quick Actions to `~/Library/Services/`.
+This installs Homebrew (if needed), `ffmpeg`, `yt-dlp`, makes `bin/ppsplit.sh` executable, and copies the Quick Actions to `~/Library/Services/`.
+
+## Sample Run
+
+The `runs/SampleRun/` folder contains a ready-to-use practice session based on a real Peace Pi live stream. Use it to try the full workflow before processing your own recordings.
+
+The folder already contains a `snippets.csv.txt` with two clips defined — no editing needed. To run through the complete workflow:
+
+1. **Copy the YouTube URL** from `runs/SampleRun/url.txt`
+2. **Right-click `runs/SampleRun/`** in Finder and run **Quick Action 1** — paste the URL when prompted to download the source video
+3. **Right-click `runs/SampleRun/`** and run **Quick Action 2** — opens `snippets.csv.txt` for editing. If the file doesn't exist it is created first; since `SampleRun` already has one, it will just open it. The timestamps are already filled in — no changes needed
+4. **Right-click the downloaded `.mp4`** and run **Quick Action 3** to extract the two sample clips
+
+The extracted clips will appear alongside the source video in `runs/SampleRun/`. This is a safe place to experiment — nothing outside this folder is affected.
 
 ## YouTube URL Format
 
@@ -113,7 +127,7 @@ To ensure the fade covers only the intended content boundaries, the extraction w
 
 If the segment starts within 1 second of the beginning of the source video, the adjusted start is clamped to `0`.
 
-The `-t` flag can also enable transitions when running `ppsplit.sh` directly from the command line (see below).
+The `-t` flag can also enable transitions when running `bin/ppsplit.sh` directly from the command line (see below).
 
 ## Project Structure
 
@@ -134,8 +148,9 @@ ppsplit/
 │   ├── test_ppsplit_debug.sh           # Layer 2: CSV/extraction logic
 │   ├── COVERAGE.md                     # Test coverage report
 │   └── fixtures/                       # Test input files (CSV fixtures + synthetic video)
+├── bin/
+│   └── ppsplit.sh                      # Extraction engine (called by Quick Action 3)
 ├── install.command                     # One-time setup script (double-click to run)
-├── ppsplit.sh                          # Extraction engine (called by Quick Action 3)
 ├── .gitignore
 ├── QUICKSTART.md                       # Quick reference for experienced users
 └── README.md
@@ -164,20 +179,20 @@ ppsplit/
 
 ### Direct Script Usage
 
-`ppsplit.sh` can also be run directly from the command line:
+`bin/ppsplit.sh` can also be run directly from the command line:
 
 ```bash
-./ppsplit.sh <video_file>          # normal run
-./ppsplit.sh -d <video_file>       # debug mode (prints commands, no execution)
-./ppsplit.sh -t <video_file>       # enable fade in/out transitions
-./ppsplit.sh -d -t <video_file>    # debug mode with transitions
-./ppsplit.sh -h                    # help
+./bin/ppsplit.sh <video_file>          # normal run
+./bin/ppsplit.sh -d <video_file>       # debug mode (prints commands, no execution)
+./bin/ppsplit.sh -t <video_file>       # enable fade in/out transitions
+./bin/ppsplit.sh -d -t <video_file>    # debug mode with transitions
+./bin/ppsplit.sh -h                    # help
 ```
 
 ### Help Output
 
 ```
-$ ./ppsplit.sh -h
+$ ./bin/ppsplit.sh -h
 Usage: ppsplit.sh [-d] [-t] <video_file>
   -d: Debug mode (show commands without executing)
   -t: Enable fade in/out transitions on each segment

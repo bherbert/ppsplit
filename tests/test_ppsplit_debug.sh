@@ -14,7 +14,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures"
-PPSPLIT="$PROJECT_DIR/ppsplit.sh"
+PPSPLIT="$PROJECT_DIR/bin/ppsplit.sh"
 TEST_VIDEO="$FIXTURES_DIR/test_video.mp4"
 
 # Color output
