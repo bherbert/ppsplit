@@ -27,7 +27,7 @@ A **session** represents one video — typically a single live stream recording.
 
 **Step 0 — Create a session folder:**
 
-Create a new folder to hold the video and all its extracted clips. Name it by date or show name (e.g., `2025-09-21/`). The source video, `snippets.csv.txt`, extracted clips, and log file for this session will all live here.
+Create a new folder to hold the video and all its extracted clips. Name it by date or show name (e.g., `2026-03-16/`). The source video, `snippets.csv.txt`, extracted clips, and log file for this session will all live here.
 
 **Step 1 — Right-click the session folder itself:**
 

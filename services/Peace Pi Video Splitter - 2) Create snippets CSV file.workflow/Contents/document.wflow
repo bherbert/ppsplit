@@ -66,6 +66,10 @@ for FOLDER in "$@"; do
     if [ ! -f "$FILE" ]; then
         echo "# start-timestamp, end-timestamp, video-name" &gt; "$FILE"
         echo "0:00,0:00,title" &gt;&gt; "$FILE"
+        if [ ! -f "$FILE" ]; then
+            osascript -e "display dialog \"Could not create snippets.csv.txt in the selected folder. Make sure the folder is writable.\" with title \"Peace Pi Video Splitter\" buttons {\"OK\"} default button \"OK\" with icon caution"
+            exit 1
+        fi
         echo "Created $FILE" &gt;&amp;2
     else
         echo "$FILE already exists." &gt;&amp;2
