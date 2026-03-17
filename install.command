@@ -12,6 +12,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PPSPLIT_BIN="$HOME/Library/Application Support/PeacePi/bin"
 
+# --- Remove quarantine ---
+#
+# When files are downloaded from the internet (e.g. a GitHub release zip),
+# macOS tags them with com.apple.quarantine. Clear it from the entire project
+# folder so the workflows and scripts install without Gatekeeper interference.
+
+xattr -cr "$SCRIPT_DIR" 2>/dev/null || true
+
 # --- Welcome ---
 
 osascript -e 'display dialog "This will install the Peace Pi Video Splitter on your Mac.\n\nA Terminal window will open — please leave it running until it finishes." with title "Peace Pi Video Splitter" buttons {"Cancel", "Install"} default button "Install" with icon note' \

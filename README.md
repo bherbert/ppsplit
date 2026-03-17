@@ -60,6 +60,19 @@ Double-click `install.command` once to install all dependencies and register the
 
 This installs Homebrew (if needed), `ffmpeg`, `yt-dlp`, makes `bin/ppsplit.sh` executable, and copies the Quick Actions to `~/Library/Services/`.
 
+**If macOS blocks `install.command` with "Apple could not verify…":**
+
+This happens when the file was downloaded from the internet (including GitHub release zips). macOS quarantines downloaded files by default. To clear it:
+
+1. Open **Terminal** (search for it in Spotlight)
+2. Run this command, where `ppsplit-x.y.z` is the actual folder name from the unzipped release:
+   ```
+   xattr -cr ~/Downloads/ppsplit-x.y.z
+   ```
+3. Then double-click `install.command` again
+
+> Note: `install.command` automatically clears quarantine from the rest of the project folder once it starts running, so you only need to do this one-time step for `install.command` itself.
+
 ## Sample Run
 
 The `runs/SampleRun/` folder contains a ready-to-use practice session based on a real Peace Pi live stream. Use it to try the full workflow before processing your own recordings.
